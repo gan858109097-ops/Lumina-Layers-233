@@ -14,8 +14,10 @@ import os
 import time
 import threading
 import webbrowser
+import gradio as gr
 from ui.layout import create_app
 from core.tray import LuminaTray
+from ui.styles import CUSTOM_CSS
 
 PORT = 7860
 
@@ -47,7 +49,9 @@ if __name__ == "__main__":
         server_port=PORT,
         show_error=True,
         prevent_thread_lock=True,
-        favicon_path="icon.ico" if os.path.exists("icon.ico") else None
+        favicon_path="icon.ico" if os.path.exists("icon.ico") else None,
+        css=CUSTOM_CSS, 
+        theme=gr.themes.Soft()
     )
 
     # 4. Keep Main Thread Alive

@@ -38,7 +38,7 @@ from .callbacks import (
 
 def create_app():
     """创建Gradio应用界面"""
-    with gr.Blocks(title="Lumina Studio", css=CUSTOM_CSS, theme=gr.themes.Soft()) as app:
+    with gr.Blocks(title="Lumina Studio") as app:
 
         # Header with Language Indicator
         with gr.Row():
