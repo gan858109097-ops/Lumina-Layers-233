@@ -15,23 +15,32 @@ import sys
 import time
 import threading
 import webbrowser
+import socket
 import gradio as gr     # type:ignore
 from ui.layout import create_app
 from core.tray import LuminaTray
 from ui.styles import CUSTOM_CSS
 
-PORT = 7860
+def find_available_port(start_port=7860, max_attempts=1000):
+    import socket
+    for i in range(max_attempts):
+        port = start_port + i
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+    raise RuntimeError(f"No available port found after {max_attempts} attempts")
 
-def start_browser():
+def start_browser(port):
     """Launch the default web browser after a short delay."""
     time.sleep(2)
-    webbrowser.open(f"http://127.0.0.1:{PORT}")
+    webbrowser.open(f"http://127.0.0.1:{port}")
 
 if __name__ == "__main__":
 
     # 1. Initialize System Tray
     tray = None
     try:
+        PORT = find_available_port(7860)
         tray = LuminaTray(port=PORT)
     except Exception as e:
         print(f"⚠️ Warning: Failed to initialize tray: {e}")
