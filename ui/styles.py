@@ -42,6 +42,10 @@ CUSTOM_CSS = """
     margin-bottom: 15px;
 }
 
+.stats-bar strong {
+    color: #a0a0ff;
+}
+
 /* Tab Styling */
 .tab-nav button {
     font-size: 1.1em !important;
