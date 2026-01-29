@@ -202,7 +202,7 @@ def convert_image_to_3d(image_path, lut_path, target_width_mm, spacer_thick,
     total_layers = full_matrix.shape[0]
     print(f"[CONVERTER] Voxel matrix: {full_matrix.shape} (Z×H×W)")
     
-    # ========== Step 6: Generate 3D Meshes ==========
+# ========== Step 6: Generate 3D Meshes ==========
     scene = trimesh.Scene()
     
     # Create transformation matrix (pixel → millimeter)
@@ -217,23 +217,28 @@ def convert_image_to_3d(image_path, lut_path, target_width_mm, spacer_thick,
     mesher = get_mesher(modeling_mode)
     print(f"[CONVERTER] Using mesher: {mesher.__class__.__name__}")
     
+    # [FIX] Track which slots actually have meshes
+    valid_slot_names = []
+
     # Generate mesh for each material
     for mat_id in range(4):
         mesh = mesher.generate_mesh(full_matrix, mat_id, target_h)
         if mesh:
             mesh.apply_transform(transform)
             mesh.visual.face_colors = preview_colors[mat_id]
-            mesh.metadata['name'] = slot_names[mat_id]
+            name = slot_names[mat_id]
+            mesh.metadata['name'] = name
             scene.add_geometry(
                 mesh, 
-                node_name=slot_names[mat_id], 
-                geom_name=slot_names[mat_id]
+                node_name=name, 
+                geom_name=name
             )
-            print(f"[CONVERTER] Added mesh for {slot_names[mat_id]}")
+            # [FIX] Only add name if mesh exists
+            valid_slot_names.append(name)
+            print(f"[CONVERTER] Added mesh for {name}")
     
     # ========== Step 7: Add Keychain Loop ==========
     loop_added = False
-    slot_names_with_loop = slot_names
     
     if add_loop and loop_info is not None:
         try:
@@ -255,7 +260,8 @@ def convert_image_to_3d(image_path, lut_path, target_width_mm, spacer_thick,
                     node_name="Keychain_Loop", 
                     geom_name="Keychain_Loop"
                 )
-                slot_names_with_loop = slot_names + ["Keychain_Loop"]
+                # [FIX] Add loop to valid names
+                valid_slot_names.append("Keychain_Loop")
                 loop_added = True
                 print(f"[CONVERTER] Loop added successfully")
         except Exception as e:
@@ -267,7 +273,8 @@ def convert_image_to_3d(image_path, lut_path, target_width_mm, spacer_thick,
     scene.export(out_path)
     
     # Fix 3MF object names
-    safe_fix_3mf_names(out_path, slot_names_with_loop)
+    # [FIX] Use the filtered list instead of the full list
+    safe_fix_3mf_names(out_path, valid_slot_names)
     
     print(f"[CONVERTER] 3MF exported: {out_path}")
     
