@@ -11,7 +11,7 @@ import trimesh
 from PIL import Image, ImageDraw, ImageFont
 import gradio as gr
 
-from config import PrinterConfig, ColorSystem, PREVIEW_SCALE, PREVIEW_MARGIN, OUTPUT_DIR
+from config import PrinterConfig, ColorSystem, ModelingMode, PREVIEW_SCALE, PREVIEW_MARGIN, OUTPUT_DIR
 from utils import Stats, safe_fix_3mf_names
 
 # Import refactored modules
@@ -589,11 +589,12 @@ def _create_preview_mesh(matched_rgb, mask_solid, total_layers):
 # ========== Preview Related Functions ==========
 
 def generate_preview_cached(image_path, lut_path, target_width_mm,
-                            auto_bg, bg_tol, color_mode):
+                            auto_bg, bg_tol, color_mode,
+                            modeling_mode: ModelingMode = ModelingMode.HIGH_FIDELITY):
     """
     Generate preview and cache data
     For 2D preview interface
-    
+
     Uses same smart defaults for consistency
     """
     if image_path is None:
@@ -617,7 +618,7 @@ def generate_preview_cached(image_path, lut_path, target_width_mm,
         result = processor.process_image(
             image_path=image_path,
             target_width_mm=target_width_mm,
-            modeling_mode="pixel",  # Preview uses pixel mode
+            modeling_mode=modeling_mode,  # Use user-selected modeling mode
             quantize_colors=16,
             auto_bg=auto_bg,
             bg_tol=bg_tol,
